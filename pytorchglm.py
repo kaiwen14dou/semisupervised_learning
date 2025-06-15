@@ -8,16 +8,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def train_manual_logistic_regression(
-    df,
-    outcome_col="Y",
-    feature_start_col=5,
-    cutoff=14,
-    test_size=0.2,
-    pos_weight=0.8,
-    neg_weight=0.2,
-    lr= 0.01,
-    epochs = 30,
-    verbose=True
+    df,                      # Input dataframe containing features and outcome
+    outcome_col="Y",         # Name of the outcome column in df
+    feature_start_col=5,     # Starting column index of features
+    cutoff=14,               # Threshold to binarize outcome
+    test_size=0.2,           # Proportion of data to use for testing
+    pos_weight=0.8,          # Weight for positive class in custom loss
+    neg_weight=0.2,          # Weight for negative class in custom loss
+    lr=0.01,                 # Learning rate
+    epochs=30,               # Number of training epochs
+    verbose=True             # Whether to print progress
 ):
 
     class ManualLogisticRegression(nn.Module):
@@ -36,7 +36,7 @@ def train_manual_logistic_regression(
             output = torch.clamp(output, min=1e-8, max=1 - 1e-8) 
             loss = - (pos_weight * target * torch.log(output) +
               neg_weight * (1 - target) * torch.log(1 - output))
-            return loss.mean()
+            return loss.sum()
 
         def predict_proba(self, x):
             self.eval()
@@ -79,7 +79,7 @@ def train_manual_logistic_regression(
         y_true = y_test_tensor.squeeze().numpy()
 
     auc = roc_auc_score(y_true, probs)
-    logloss = -2 * np.mean(
+    logloss = -2 * np.sum(
         pos_weight * y_true * np.log(np.clip(probs, 1e-8, 1)) +
         neg_weight * (1 - y_true) * np.log(np.clip(1 - probs, 1e-8, 1))
     )
